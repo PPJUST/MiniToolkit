@@ -1,26 +1,30 @@
 """
 名称：文件Hash计算器
-版本号：v1.0
+版本号：v1.1
 更新日期：2026.01.04
 功能：计算文件的MD5和SHA-256哈希值
 使用方法：打包为可执行文件后，将文件拖入可执行文件即可
 其他说明：仅支持拖入执行，不支持直接打开使用
 """
-
+import hashlib
 import os
 import sys
 
-import lzytools
-
 
 def calc_md5(filepath: str):
-    md5 = lzytools.file.calc_md5_from_file(filepath)
-    return md5
+    _md5 = hashlib.md5()
+    with open(filepath, 'rb') as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            _md5.update(chunk)
+    return _md5.hexdigest()
 
 
 def calc_sha256(filepath: str):
-    sha256 = lzytools.file.calc_sha256_from_file(filepath)
-    return sha256
+    _sha256 = hashlib.sha256()
+    with open(filepath, 'rb') as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            _sha256.update(chunk)
+    return _sha256.hexdigest()
 
 
 try:
@@ -29,7 +33,7 @@ except IndexError:
     drop_paths = []
 
 print("""名称：文件Hash计算器
-版本号：v1.0
+版本号：v1.1
 更新日期：2026.01.04
 功能：计算文件的MD5和SHA-256哈希值
 使用方法：打包为可执行文件后，将文件拖入可执行文件即可
