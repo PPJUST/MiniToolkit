@@ -6,6 +6,9 @@
 使用方法：打包为可执行文件后，将文件拖入可执行文件即可
 其他说明：仅支持拖入执行，不支持直接打开使用
 """
+print(__doc__ if __doc__ else "该文件未定义描述信息")
+print('-' * 20)
+
 import hashlib
 import os
 import sys
@@ -31,9 +34,6 @@ try:
     drop_paths = sys.argv[1:]
 except IndexError:
     drop_paths = []
-
-print(__doc__ if __doc__ else "该文件未定义描述信息")
-print('-' * 20)
 
 if drop_paths:
     for path in drop_paths:
