@@ -30,22 +30,23 @@ def calc_sha256(filepath: str):
     return _sha256.hexdigest()
 
 
-try:
-    drop_paths = sys.argv[1:]
-except IndexError:
-    drop_paths = []
+if __name__ == '__main__':
+    try:
+        drop_paths = sys.argv[1:]
+    except IndexError:
+        drop_paths = []
 
-if drop_paths:
-    for path in drop_paths:
-        if os.path.exists(path) and os.path.isfile(path):
-            print('filepath:', path)
-            md5 = calc_md5(path)
-            print('MD5:', md5)
-            sha256 = calc_sha256(path)
-            print('SHA-256:', sha256)
-            print('-' * 20)
+    if drop_paths:
+        for path in drop_paths:
+            if os.path.exists(path) and os.path.isfile(path):
+                print('filepath:', path)
+                md5 = calc_md5(path)
+                print('MD5:', md5)
+                sha256 = calc_sha256(path)
+                print('SHA-256:', sha256)
+                print('-' * 20)
 
-    input("\n计算完成！输入回车后退出...")
-else:
-    print("请将文件拖入可执行文件！不支持直接打开使用")
-    input("\n输入回车后退出...")
+        input("\n计算完成！输入回车后退出...")
+    else:
+        print("请将文件拖入可执行文件！不支持直接打开使用")
+        input("\n输入回车后退出...")
