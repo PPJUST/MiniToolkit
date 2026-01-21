@@ -1,13 +1,14 @@
 """
 名称：重命名GoPro视频
 版本号：v1.0
-更新日期：2026.01.16
+更新日期：2026.01.21
 功能：规范的重命名GoPro的视频文件
 使用方法：按提示操作即可
 其他说明：GoPro 摄像机的文件命名规则https://community.gopro.com/s/article/GoPro-Camera-File-Naming-Convention?language=zh_CN
 """
+import os
 import re
-from typing import List
+from typing import List, Dict
 
 print(__doc__ if __doc__ else "该文件未定义描述信息")
 print('-' * 20)
@@ -68,29 +69,34 @@ def guess_first_chaptered_name(name: str) -> str:
         return guess_name
 
     return ''
+
+
 def standardized_name(name: str) -> str:
     """标准化文件，将视频编号提前"""
     if re.match(Pattern_Old_Single, name):
-        chapter = '01'
+        chapter = '00'
         number = re.match(Pattern_Old_Single, name).group(1)
     elif re.match(Pattern_Old_Chaptered, name):
-        chapter, number = re.match(Pattern_Old_Chaptered, name).group()
+        chapter, number = re.match(Pattern_Old_Chaptered, name).groups()
     elif re.match(Pattern_New_Single_AVC, name):
-        chapter, number = re.match(Pattern_New_Single_AVC, name).group()
+        chapter, number = re.match(Pattern_New_Single_AVC, name).groups()
     elif re.match(Pattern_New_Single_HAVC, name):
-        chapter, number = re.match(Pattern_New_Single_HAVC, name).group()
+        chapter, number = re.match(Pattern_New_Single_HAVC, name).groups()
     elif re.match(Pattern_New_Chaptered_AVC, name):
-        chapter, number = re.match(Pattern_New_Chaptered_AVC, name).group()
+        chapter, number = re.match(Pattern_New_Chaptered_AVC, name).groups()
     elif re.match(Pattern_New_Chaptered_HAVC, name):
-        chapter, number = re.match(Pattern_New_Chaptered_HAVC, name).group()
+        chapter, number = re.match(Pattern_New_Chaptered_HAVC, name).groups()
     else:
-        chapter, number =None,None
+        chapter, number = None, None
 
     if chapter and number:
         new_name = f'{number}_{chapter}_{name}'
         return new_name
+    else:
+        return ''
 
-def class_names(names:List[str])->List[str]:
+
+def class_names(names: List[str]) -> List[str]:
     """将传入的文件名列表进行分组，将统一编号的文件名分在同一组中"""
     class_dict = dict()
     for name in names:
@@ -103,4 +109,58 @@ def class_names(names:List[str])->List[str]:
     return list(class_dict.values())
 
 
+def rename_files(filepaths: List[str]):
+    """批量重命名文件"""
+    print('生成预修改的文件名')
+    # 生成文件路径和新文件名的字典
+    file_dict: Dict[str, str] = dict()
+    for filepath in filepaths:
+        file_dict[filepath] = ''
+        filename = os.path.basename(filepath)
+        filetitle, extension = os.path.splitext(filename)
+        new_filetitle = standardized_name(filetitle)
+        if new_filetitle:
+            new_filename = new_filetitle + extension
+            file_dict[filepath] = new_filename
+            print(f'原文件名：{filename} -> {new_filename}')
+        else:
+            pass
 
+    # 再次确认是否需要重命名
+    is_rename = input('是否执行重命名？(Y/N)：')
+    if is_rename.upper() == 'Y':
+        for filepath, new_filename in file_dict.items():
+            if new_filename:
+                new_filepath = os.path.join(os.path.dirname(filepath), new_filename)
+                new_filepath = os.path.normpath(new_filepath)
+                os.rename(filepath, new_filepath)
+                print(f'重命名成功：{filepath} -> {new_filename}')
+            else:
+                print(f'文件名未修改：{filepath}')
+
+    print('重命名完成')
+
+
+def get_files(path: str) -> List[str]:
+    """获取指定目录下的所有文件"""
+    filepaths = []
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            filepath = os.path.join(root, file)
+            filepath = os.path.normpath(filepath)
+            filepaths.append(filepath)
+
+    return filepaths
+
+
+if __name__ == '__main__':
+    input_path = input('输入GoPro视频所在的文件夹路径：')
+    if os.path.exists(input_path) and os.path.isdir(input_path):
+        _files = get_files(input_path)
+        rename_files(_files)
+
+        print('-' * 20)
+        input("\n完成！输入回车后退出...")
+    else:
+        print("传入路径错误")
+        input("\n输入回车后退出...")
