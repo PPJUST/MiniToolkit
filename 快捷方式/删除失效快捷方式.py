@@ -1,7 +1,7 @@
 """
 名称：删除失效快捷方式
-版本号：v1.0
-更新日期：2026.01.15
+版本号：v1.1
+更新日期：2026.01.22
 功能：删除一个文件夹中指向路径无效的快捷方式
 使用方法：打开后，输入对应代码并回车后执行操作
 其他说明：
@@ -46,22 +46,22 @@ def get_config_setting(key: str) -> str:
     return config.get('DEFAULT', key)
 
 
-def set_check_folder(dirpath: str):
+def set_check_folder(_dirpath: str):
     """设置需要检查的文件夹路径"""
     config = configparser.ConfigParser()
     config.read('config.ini')
-    config.set('DEFAULT', 'check_dirpath', dirpath)
+    config.set('DEFAULT', 'check_dirpath', _dirpath)
     config.write(open('config.ini', 'w'))
 
 
-def check_dirpath(dirpath: str):
+def check_dirpath(_dirpath: str):
     """检查文件夹"""
-    if not dirpath or not os.path.exists(dirpath):
-        print(f'指定路径不存在：{dirpath}')
+    if not _dirpath or not os.path.exists(_dirpath):
+        print(f'指定路径不存在：{_dirpath}')
         return
 
-    for filename in os.listdir(dirpath):
-        fullpath = os.path.join(dirpath, filename)
+    for filename in os.listdir(_dirpath):
+        fullpath = os.path.join(_dirpath, filename)
         if os.path.isfile(fullpath) and fullpath.lower().endswith('.lnk') and os.path.getsize(fullpath) < 1048576:
             original_path = get_original_path(fullpath)
             print(f'---【{filename}】 的指向文件路径为 【{original_path}】')
