@@ -1,15 +1,18 @@
 """
 名称：更新Github加速Hosts
-版本号：v1.0
-更新日期：2026.01.22
+版本号：v1.1
+更新日期：2026.01.23
 功能：更新Hosts，加速访问Github
 使用方法：按提示操作即可
 其他说明：
 """
 import subprocess
+import sys
 from typing import Union
 
+import pythoncom
 import requests
+import win32com.shell.shell as shell
 
 print(__doc__ if __doc__ else "该文件未定义描述信息")
 print('-' * 20)
@@ -17,6 +20,10 @@ print('-' * 20)
 _Hosts_File = r'C:\Windows\System32\drivers\etc\hosts'
 _Hosts_URL_FetchGitHub = 'https://hosts.gitcdn.top/hosts.txt'
 _Hosts_URL_Github520 = 'https://raw.hellogithub.com/hosts'
+
+
+def run_as_admin():
+    shell.ShellExecuteEx(lpVerb='runas', lpFile=sys.executable, lpParameters=' '.join(sys.argv), nShow=1)
 
 
 def read_local_hosts() -> list:
@@ -87,22 +94,30 @@ def add_local_hosts(hosts_list: list):
 
 
 if __name__ == '__main__':
-    _code = input(
-        '输入对应代码后回车执行：\n1.更新FetchGitHub\n2.更新GitHub520\n3.清除Github相关host\n4.退出\n在此输入：')
-    if _code == '1':
-        print('正在更新Hosts-FetchGitHub')
-        _hosts_list = read_url_hosts(_Hosts_URL_FetchGitHub)
-        add_local_hosts(_hosts_list)
-        print('更新完成')
-    elif _code == '2':
-        print('正在更新Hosts-GitHub520')
-        _hosts_list = read_url_hosts(_Hosts_URL_Github520)
-        add_local_hosts(_hosts_list)
-        print('更新完成')
-    elif _code == '3':
-        print('正在清除Github相关host')
-        clear_local_github_hosts()
-        print('清除完成')
-    elif _code == '4':
-        print('退出')
-        exit()
+    # 检查管理员权限
+    if not shell.IsUserAnAdmin():
+        run_as_admin()
+    pythoncom.CoUninitialize()
+
+    while True:
+        _code = input(
+            '输入对应代码后回车执行：\n1.更新FetchGitHub\n2.更新GitHub520\n3.清除Github相关host\n4.退出\n在此输入：')
+        if _code == '1':
+            print('正在更新Hosts-FetchGitHub')
+            _hosts_list = read_url_hosts(_Hosts_URL_FetchGitHub)
+            add_local_hosts(_hosts_list)
+            print('更新完成')
+        elif _code == '2':
+            print('正在更新Hosts-GitHub520')
+            _hosts_list = read_url_hosts(_Hosts_URL_Github520)
+            add_local_hosts(_hosts_list)
+            print('更新完成')
+        elif _code == '3':
+            print('正在清除Github相关host')
+            clear_local_github_hosts()
+            print('清除完成')
+        elif _code == '4':
+            print('退出')
+            exit()
+
+        print('-' * 20)
